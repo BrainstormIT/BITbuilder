@@ -1,9 +1,14 @@
 <?php
 
 use QueryBuilder\Builder\QueryBuilder;
+use QueryBuilder\Helpers\Database;
+
 require '../src/builder/QueryBuilder.php';
 require '../src/helpers/Arr.php';
-$qb = new QueryBuilder();
+require '../src/helpers/Database.php';
+
+$db = new Database();
+$qb = new QueryBuilder($db);
 
 echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select(\'*\')->getAll();') .'</code>';
 $select = $qb->table('candidates')->select('*')->getAll();
@@ -49,6 +54,27 @@ $select = $qb->table('candidates')->select('*')->orderBy('id', 'DESC')->getAll()
 
 foreach ($select as $candidate) {
     echo '<p>' . $candidate['id'] . '</p>';
+}
+echo '<hr>';
+
+echo '<code style="color: darkgreen">' . htmlentities('$select = $qb->table(\'candidates\')->select([\'voornaam\', \'achternaam\'])->where(\'id\', \'>\', 1)->and_(\'voornaam\', \'!=\', \'frank\')->getAll();') .'</code>';
+
+$select = $qb->table('candidates')
+            ->select(['voornaam', 'achternaam'])
+            ->where('id', '>', 1)
+            ->and_('voornaam', '!=', 'frank')
+            ->getAll();
+
+foreach ($select as $candidate) {
+    echo '<p>' . $candidate['voornaam'] . ' ' . $candidate['achternaam'] . '</p>';
+}
+echo '<hr>';
+
+echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select(\'achternaam\')->orderBy(\'achternaam\')->limit(4)->getAll();') .'</code>';
+$select =  $qb->table('candidates')->select('achternaam')->orderBy('achternaam')->limit(4)->getAll();
+
+foreach ($select as $candidate) {
+    echo '<p>' . $candidate['achternaam'] . '</p>';
 }
 echo '<hr>';
 

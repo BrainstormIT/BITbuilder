@@ -29,8 +29,15 @@ class QueryBuilder {
      */
     private $operators = ['=', '!=', '<', '>', '>=', '<='];
 
-    public function __construct() {
-        $this->db = new Database();
+    /**
+     * @var array
+     * Datatypes that should not get quoted
+     */
+    private  $dont_quote = ['boolean', 'integer', 'double',
+                            'array', 'object', 'resource', 'NULL'];
+
+    public function __construct(\PDO $db) {
+        $this->db = $db;
     }
 
     /**
@@ -102,32 +109,102 @@ class QueryBuilder {
      */
     public function where($column, $operator, $value = '=') {
         if (in_array($operator, $this->operators)) {
-            $this->query .= ' WHERE ' . $column . $operator . $value;
+            $this->query .= ' WHERE ' . $column . $operator . $this->quote($value);
         } else {
             // The operator becomes the value
             // and the value becomes the operator
             // TODO: Is this clear enough?
-            $this->query .= ' WHERE ' . $column . $value . $operator;
+            $this->query .= ' WHERE ' . $column . $value . $this->quote($operator);
         }
 
         return $this;
     }
 
     /**
-     * @param $by
-     * @param string $alphabetical
+     * @param $column
+     * @param $operator
+     * @param $value
      * @return $this
      *
-     * Returns order by statement:
+     * Adds OR statement to WHERE clause:
+     *
+     * $select = $qb->table('users')
+     *              ->select(['first_name', 'last_name'])
+     *              ->where('id', '>', 1)
+     *              ->or_('first', '!=', 'John')
+     *              ->getAll();
      */
-    public function orderBy($by, $alphabetical = 'ASC') {
-        if ($alphabetical == 'ASC' || $alphabetical == 'DESC') {
-            $this->query .= ' ORDER BY ' . $by . ' ' .$alphabetical;
+    public function or_ ($column, $operator, $value) {
+        if (in_array($operator, $this->operators)) {
+            $this->query .= ' OR ' . $column . $operator . $this->quote($value);
         } else {
-            echo $alphabetical . ' is not valid';
+            // The operator becomes the value
+            // and the value becomes the operator
+            $this->query .= ' OR ' . $column . $value . $this->quote($operator);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $column
+     * @param $operator
+     * @param $value
+     * @return $this
+     *
+     * Adds AND statement to WHERE clause:
+     *
+     * $select = $qb->table('users')
+     *              ->select(['first_name', 'last_name'])
+     *              ->where('id', '>', 1)
+     *              ->and_('first', '!=', 'John')
+     *              ->getAll();
+     */
+    public function and_($column, $operator, $value) {
+        if (in_array($operator, $this->operators)) {
+            $this->query .= ' AND ' . $column . $operator . $this->quote($value);
+        } else {
+            // The operator becomes the value
+            // and the value becomes the operator
+            $this->query .= ' AND ' . $column . $value . $this->quote($operator);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $sort
+     * @param string $order
+     * @return $this
+     *
+     * Orders found record (ASC or DESC):
+     * $qb->table('users')->select('*')->orderBy('id')->getAll();
+     */
+    public function orderBy($sort, $order = 'ASC') {
+        if ($order == 'ASC' || $order == 'DESC') {
+            $this->query .= ' ORDER BY ' . $sort . ' ' .$order;
+        } else {
+            echo $order . ' is not valid';
             return false;
         }
 
+        return $this;
+    }
+
+    /**
+     * @param $limit
+     * @return $this
+     *
+     * Limits amount of rows:
+     * $qb->table('users')->select('*')->limit(20)->getAll();
+     */
+    public function limit($limit) {
+        if (!is_int($limit)) {
+            var_dump('No valid limit');
+            return false;
+        }
+
+        $this->query .= ' LIMIT ' . $limit;
         return $this;
     }
 
@@ -144,7 +221,7 @@ class QueryBuilder {
      * ]
      *
      * $this->table('users')->insert($record);
-     * TODO: Secure against SQL Injection: $this->db->prepare()
+     * TODO: Secure against SQL Injection
      */
     public function insert($columns) {
         // Check if array is associative
@@ -166,16 +243,12 @@ class QueryBuilder {
                     $fields .= $arr_keys[$ii] . ', ';
 
                     // If $arr_values[$ii] is an integer don't quote it
-                    $values .= is_int($arr_values[$ii])
-                        ? $arr_values[$ii] . ', '
-                        : $this->db->quote($arr_values[$ii]) . ', ';
+                    $values .= $this->quote($arr_values[$ii]) . ')';
                 } else {
                     $fields .= $arr_keys[$ii] . ') VALUES (';
 
                     // If $arr_values[$ii] is an integer don't quote it
-                    $values .= is_int($arr_values[$ii])
-                        ? $arr_values[$ii] . ')'
-                        : $this->db->quote($arr_values[$ii]) . ')';
+                    $values .= $this->quote($arr_values[$ii]) . ')';
                 }
             }
 
@@ -185,6 +258,9 @@ class QueryBuilder {
             try {
                 $query = $this->db->prepare($this->query);
                 $query->execute();
+                $this->clearQuery();
+
+                return true;
             } catch (\PDOException $e) {
                 var_dump($e->getMessage());
                 return false;
@@ -204,8 +280,6 @@ class QueryBuilder {
     public function getAll() {
         $query = $this->db->prepare($this->query);
         $query->execute();
-
-        // clear query
         $this->clearQuery();
 
         return $query->fetchAll(\PDO::FETCH_ASSOC);
@@ -221,8 +295,6 @@ class QueryBuilder {
     public function get() {
         $query = $this->db->prepare($this->query);
         $query->execute();
-
-        // clear query
         $this->clearQuery();
 
         return $query->fetch(\PDO::FETCH_ASSOC);
@@ -237,8 +309,6 @@ class QueryBuilder {
     public function count() {
         $query = $this->db->prepare($this->query);
         $query->execute();
-
-        // clear query
         $this->clearQuery();
 
         return $query->rowCount();
@@ -259,39 +329,20 @@ class QueryBuilder {
     public function logQuery() {
         echo $this->query;
     }
-}
 
-class Database extends \PDO {
     /**
-     * Database type
+     * @param $var
+     * @return mixed
+     *
+     * Don't quote the variable if it's datatype
+     * is in the $this->dont_quote array
      */
-    private $db_type;
-    /**
-     * Database host
-     */
-    private $db_host;
-    /**
-     * Database name
-     */
-    private $db_name;
-    /**
-     * Database username
-     */
-    private $db_username;
-    /**
-     * Database password
-     */
-    private $db_password;
+    public function quote($var) {
+        if (in_array(gettype($var), $this->dont_quote)) {
+            return $var;
+        }
 
-    public function __construct() {
-        $this->db_type = 'mysql';
-        $this->db_host = 'localhost';
-        $this->db_name = 'qbtest';
-        $this->db_username = 'root';
-        $this->db_password = '';
-
-        $dsn = "$this->db_type:dbname=$this->db_name;host=$this->db_host";
-        parent::__construct($dsn, $this->db_username, $this->db_password);
+        return $this->db->quote($var);
     }
 }
 
