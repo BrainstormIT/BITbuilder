@@ -50,9 +50,16 @@ class QueryBuilder {
     private  $dont_quote = ['boolean', 'integer', 'double',
                             'array', 'object', 'resource', 'NULL'];
 
+    /**
+     * @var array
+     * This variable will contain the error message if
+     * something goes wrong
+     */
+    public $error;
+
     public function __construct(\PDO $db) {
         if (!$db instanceof \PDO) {
-            var_dump('Invalid PDO Database object provided');
+            $this->setError('q', 'Invalid PDO Database object provided');
             die();
         }
 
@@ -226,7 +233,7 @@ class QueryBuilder {
         if ($order == 'ASC' || $order == 'DESC') {
             $this->query .= ' ORDER BY ' . $sort . ' ' .$order;
         } else {
-            echo $order . ' is not valid';
+            $this->setError('q', 'No valid order');
             return false;
         }
 
@@ -242,7 +249,7 @@ class QueryBuilder {
      */
     public function limit($limit) {
         if (!is_int($limit)) {
-            var_dump('No valid limit');
+            $this->setError('q', 'No valid Limit');
             return false;
         }
 
@@ -306,7 +313,7 @@ class QueryBuilder {
 
                 return true;
             } catch (\PDOException $e) {
-                var_dump($e->getMessage());
+                $this->setError('d', $e->getMessage());
                 return false;
             }
         } else {
@@ -357,7 +364,7 @@ class QueryBuilder {
 
                 return true;
             } catch (\PDOException $e) {
-                var_dump($e->getMessage());
+                $this->setError('d', $e->getMessage());
                 return false;
             }
         } else {
@@ -380,7 +387,7 @@ class QueryBuilder {
 
             return $query->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
-            var_dump($e->getMessage());
+            $this->setError('d', $e->getMessage());
             return false;
         }
     }
@@ -401,7 +408,7 @@ class QueryBuilder {
 
             return $query->fetch(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
-            var_dump($e->getMessage());
+            $this->setError('d', $e->getMessage());
             return false;
         }
     }
@@ -421,7 +428,7 @@ class QueryBuilder {
 
             return $query->rowCount();
         } catch(\PDOException $e) {
-            var_dump($e->getMessage());
+            $this->setError('d', $e->getMessage());
             return false;
         }
     }
@@ -438,7 +445,7 @@ class QueryBuilder {
 
             return true;
         } catch (\PDOException $e) {
-            var_dump($e->getMessage());
+            $this->setError('d', $e->getMessage());
             return false;
         }
     }
@@ -484,7 +491,7 @@ class QueryBuilder {
     public function bindValues(\PDOStatement $query) {
         if (!empty($this->bind_values) && !empty($this->bind_keys)) {
             if (!$query instanceof \PDOStatement) {
-                var_dump('No valid query provided');
+                $this->setError('q', 'No valid PDO Statement provided');
             }
 
             for ($ii = 0; $ii < count($this->bind_values); $ii++) {
@@ -515,6 +522,34 @@ class QueryBuilder {
     public function logQuery() {
         echo $this->query;
     }
+
+    /**
+     * @param $type
+     * @param $message
+     *
+     * Sets $this->error with a specific
+     * Error type (QueryBuilder or Database)
+     */
+    public function setError($type, $message) {
+        switch ($type) {
+            case 'q':
+                $this->error = array('QueryBuilderError' => $message);
+                break;
+            case 'd':
+                $this->error = array('DatabaseError' => $message);
+                break;
+            default:
+                $this->error = array('Error' => $message);
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getError() {
+        return $this->error;
+    }
+
 
     /**
      * @param $var
