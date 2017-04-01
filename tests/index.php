@@ -26,8 +26,8 @@ foreach ($select as $candidate) {
 }
 echo '<hr>';
 
-echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select(\'*\')->count();') .'</code>';
-$count = $qb->table('candidates')->select('*')->count();
+echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select(\'*\')->countRows();') .'</code>';
+$count = $qb->table('candidates')->select('*')->countRows();
 echo '<p>' . $count . '<p>';
 echo '<hr>';
 
@@ -42,9 +42,9 @@ foreach ($select as $candidate) {
 echo '<hr>';
 
 echo '<code style="color: darkgreen">' . htmlentities('$fields = [\'voornaam\', \'achternaam AS last\'];') .'</code><br>';
-echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select($fields)->where(\'id\', 1)->get();') .'</code>';
+echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select($fields)->where(\'id\', 4)->get();') .'</code>';
 $fields = ['voornaam', 'achternaam AS last'];
-$select = $qb->table('candidates')->select($fields)->where('id', 1)->get();
+$select = $qb->table('candidates')->select($fields)->where('id', 4)->get();
 
 echo '<p>' . $select['voornaam'] . ' ' . $select['last'] . '</p>';
 echo '<hr>';
@@ -75,6 +75,13 @@ $select =  $qb->table('candidates')->select('achternaam')->orderBy('achternaam')
 
 foreach ($select as $candidate) {
     echo '<p>' . $candidate['achternaam'] . '</p>';
+}
+echo '<hr>';
+
+echo '<code style="color: darkgreen">' . htmlentities('$qb->raw(\'SELECT tussenvoegsel FROM candidates\')->getAll();') .'</code>';
+$select = $qb->raw('SELECT tussenvoegsel FROM candidates')->getAll();
+foreach ($select as $candidate) {
+    echo '<p>' . $candidate['tussenvoegsel'] . '</p>';
 }
 echo '<hr>';
 
