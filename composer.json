@@ -1,0 +1,20 @@
+{
+  "name": "techniter/querybuilder",
+  "description": "QueryBuilder for the Techniter Platform",
+  "authors": [
+    {
+      "name": "Brainstorm IT",
+      "email": "info@brainstormit.nl"
+    }
+  ],
+
+  "require": {
+    "php": ">=5.0.0"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "QueryBuilder": "src/"
+    }
+  }
+}
