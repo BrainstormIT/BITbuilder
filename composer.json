@@ -1,10 +1,18 @@
 {
-  "name": "techniter/querybuilder",
-  "description": "QueryBuilder for the Techniter Platform",
+  "name": "brainstormit/bitbuilder",
+  "description": "Easy to read querybuilder with a short learning curve!",
   "authors": [
     {
-      "name": "Brainstorm IT",
-      "email": "info@brainstormit.nl"
+      "name": "Dennis Slimmers",
+      "email": "dennis@brainstormit.nl"
+    },
+    {
+      "name": "Bas van der Ploeg",
+      "email": "bas@brainstormit.nl"
+    },
+    {
+      "name": "Xander Dijk",
+      "email": "xander@brainstormit.nl"
     }
   ],
 
@@ -12,9 +20,13 @@
     "php": ">=5.0.0"
   },
 
+  "require-dev": {
+    "php": ">=5.0.0"
+  },
+
   "autoload": {
     "psr-4": {
-      "QueryBuilder": "src/"
+      "bitbuilder\\": "src/"
     }
   }
 }
