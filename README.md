@@ -1,3 +1,3 @@
 # Brainstorm IT QueryBuilder
 
-![BITBUILDER](http://i.imgur.com/fV2pdif.png)
+![BITBUILDER](http://i.imgur.com/qkxfa0Z.png)
