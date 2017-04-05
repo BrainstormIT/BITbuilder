@@ -15,7 +15,7 @@ final class Builder {
      * @var String
      * Query that's going to be build
      */
-    private $query;
+    private $q;
 
     /**
      * @var String
@@ -64,6 +64,7 @@ final class Builder {
         }
 
         $this->db = $db;
+        $this->q = new Query();
     }
 
     /**
@@ -96,7 +97,7 @@ final class Builder {
      */
     public function select($columns = '*') {
         if (!is_array($columns)) {
-            $this->query .= 'SELECT ' . $columns . ' FROM ' . $this->table_name;
+            $this->q->apd('SELECT ' . $columns . ' FROM ' . $this->table_name);
         } else {
             $fields = '';
 
@@ -111,7 +112,7 @@ final class Builder {
                 }
             }
 
-            $this->query .= 'SELECT ' . $fields . ' FROM ' . $this->table_name;
+            $this->q->apd('SELECT ' . $fields . ' FROM ' . $this->table_name);
         }
 
         return $this;
@@ -135,7 +136,7 @@ final class Builder {
      */
     public function where($column, $operator, $value = '=') {
         if (in_array($operator, $this->operators)) {
-            $this->query .= ' WHERE ' . $column . $operator . ' :' . $column;
+            $this->q->apd(' WHERE ' . $column . $operator . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
@@ -143,7 +144,7 @@ final class Builder {
         } else {
             // The operator becomes the value
             // and the value becomes the operator
-            $this->query .= ' WHERE ' . $column . $value . ' :' . $column;
+            $this->q->apd(' WHERE ' . $column . $value . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
@@ -169,7 +170,7 @@ final class Builder {
      */
     public function or_ ($column, $operator, $value) {
         if (in_array($operator, $this->operators)) {
-            $this->query .= ' OR ' . $column . $operator . ':' . $column;
+            $this->q->apd(' OR ' . $column . $operator . ':' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
@@ -177,7 +178,7 @@ final class Builder {
         } else {
             // The operator becomes the value
             // and the value becomes the operator
-            $this->query .= ' OR ' . $column . $value . ':' . $column;
+            $this->q->apd(' OR ' . $column . $value . ':' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
@@ -203,7 +204,7 @@ final class Builder {
      */
     public function and_($column, $operator, $value) {
         if (in_array($operator, $this->operators)) {
-            $this->query .= ' AND ' . $column . $operator . ' :' . $column;
+            $this->q->apd(' AND ' . $column . $operator . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
@@ -211,7 +212,7 @@ final class Builder {
         } else {
             // The operator becomes the value
             // and the value becomes the operator
-            $this->query .= ' AND ' . $column . $value . ' :' . $column;
+            $this->q->apd(' AND ' . $column . $value . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
@@ -231,7 +232,7 @@ final class Builder {
      */
     public function orderBy($sort, $order = 'ASC') {
         if ($order == 'ASC' || $order == 'DESC') {
-            $this->query .= ' ORDER BY ' . $sort . ' ' .$order;
+            $this->q->apd(' ORDER BY ' . $sort . ' ' .$order);
         } else {
             $this->setError('q', 'No valid order');
             return false;
@@ -253,7 +254,7 @@ final class Builder {
             return false;
         }
 
-        $this->query .= ' LIMIT ' . $limit;
+        $this->q->apd(' LIMIT ' . $limit);
         return $this;
     }
 
@@ -285,7 +286,7 @@ final class Builder {
             $insert  = [];
 
             // Build up the insert query
-            $this->query .= 'INSERT INTO ' . $this->table_name . '(';
+            $this->q->apd('INSERT INTO ' . $this->table_name . '(');
 
             for ($ii = 0; $ii < count($arr_keys); $ii++) {
                 if ($ii != count($arr_keys) -1) {
@@ -304,10 +305,10 @@ final class Builder {
             }
 
             // Finalize query
-            $this->query .= $fields . $values;
+            $this->q->apd($fields . $values);
 
             try {
-                $query = $this->db->prepare($this->query);
+                $query = $this->db->prepare($this->q->get());
                 $query->execute($insert);
                 $this->clear();
 
@@ -338,18 +339,18 @@ final class Builder {
      * $this->table('users')->delete()->where('id', 67)->exec();
      */
     public function delete($column = null, $operator = null, $value = null) {
-        $this->query .= 'DELETE FROM ' . $this->table_name;
+        $this->q->apd('DELETE FROM ' . $this->table_name);
 
         if (!empty($column) || !empty($operator) || !empty($value)) {
             if (in_array($operator, $this->operators)) {
-                $this->query .= ' WHERE ' . $column . $operator . ' :' . $column;
+                $this->q->apd(' WHERE ' . $column . $operator . ' :' . $column);
 
                 // Add the value to the bind_values array
                 $this->bind_values[] = $value;
                 $this->bind_keys[] = ':' . $column;
             } else {
                 $value = '=';
-                $this->query .= ' WHERE ' . $column . $value . ' :' . $column;
+                $this->q->apd(' WHERE ' . $column . $value . ' :' . $column);
 
                 // Add the value/key to the bind_values/bind_keys array
                 $this->bind_values[] = $operator;
@@ -357,7 +358,7 @@ final class Builder {
             }
 
             try {
-                $query = $this->db->prepare($this->query);
+                $query = $this->db->prepare($this->q->get());
                 $this->bindValues($query);
                 $query->execute();
                 $this->clear();
@@ -402,30 +403,30 @@ final class Builder {
             $update = [];
 
             // Build up UPDATE statement
-            $this->query = ' UPDATE ' . $this->table_name . ' SET ';
+            $this->q->apd(' UPDATE ' . $this->table_name . ' SET ');
 
             for ($ii = 0; $ii < count($arr_keys); $ii++) {
                 if ($ii != count($arr_keys) -1) {
-                    $this->query .= $arr_keys[$ii] . ' = :' .$arr_keys[$ii]. ', ';
+                    $this->q->apd($arr_keys[$ii] . ' = :' .$arr_keys[$ii]. ', ');
                     $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
                 } else {
-                    $this->query .= $arr_keys[$ii] . ' = :' .$arr_keys[$ii];
+                    $this->q->apd($arr_keys[$ii] . ' = :' .$arr_keys[$ii]);
                     $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
                 }
             }
 
             if (!empty($column) || !empty($operator) || !empty($value)) {
                 if (in_array($operator, $this->operators)) {
-                    $this->query .= ' WHERE ' . $column . $operator . ' :' . $column;
+                    $this->q->apd(' WHERE ' . $column . $operator . ' :' . $column);
                     $update[':' . $column] = $value;
                 } else {
                     $value = '=';
-                    $this->query .= ' WHERE ' . $column . $value . ' :' . $column;
+                    $this->q->apd(' WHERE ' . $column . $value . ' :' . $column);
                     $update[':' . $column] = $operator;
                 }
 
                 try {
-                    $query = $this->db->prepare($this->query);
+                    $query = $this->db->prepare($this->q->get());
                     $query->execute($update);
                     $this->clear();
 
@@ -457,7 +458,7 @@ final class Builder {
      */
     public function getAll() {
         try {
-            $query = $this->db->prepare($this->query);
+            $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
             $query->execute();
             $this->clear();
@@ -478,7 +479,7 @@ final class Builder {
      */
     public function get() {
         try {
-            $query = $this->db->prepare($this->query);
+            $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
             $query->execute();
             $this->clear();
@@ -498,7 +499,7 @@ final class Builder {
      */
     public function countRows() {
         try {
-            $query = $this->db->prepare($this->query);
+            $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
             $query->execute();
             $this->clear();
@@ -513,11 +514,11 @@ final class Builder {
     /**
      * @return bool
      *
-     * Executes $this->query
+     * Executes $this->q
      */
     public function exec() {
         try {
-            $query = $this->db->prepare($this->query);
+            $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
             $query->execute();
             $this->clear();
@@ -537,7 +538,7 @@ final class Builder {
      * however the user wants it to be
      */
     public function raw($query) {
-        $this->query .= $query;
+        $this->q->apd($query);
         return $this;
     }
 
@@ -587,22 +588,22 @@ final class Builder {
     }
 
     /**
-     * Empties $this->query,
+     * Empties $this->q,
      * $this->bind_values and $this->bind_keys.
      * This needs to been done after executing
      * get, getAll, count, exec, insert etc.
      */
     public function clear() {
-        $this->query = '';
+        $this->q->emptyQuery();
         $this->bind_values = [];
         $this->bind_keys = [];
     }
 
     /**
-     * Prints $this->query
+     * Prints $this->q
      */
     public function logQuery() {
-        echo $this->query;
+        echo $this->q->get();
     }
 
     /**
