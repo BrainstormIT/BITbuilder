@@ -86,5 +86,13 @@ foreach ($select as $candidate) {
 }
 echo '<hr>';
 
+echo '<code style="color: darkgreen">' . htmlentities(' $qb->table(\'vacancies v\')->select([\'v.title\', \'v.description\'])->join(\'candidates c\', \'v.cid\', \'c.id\')->getAll();') .'</code>';
+$select = $qb->table('vacancies v')
+            ->select(['v.title', 'v.description'])
+            ->join('candidates c', 'v.cid', '=', 'c.id')
+            ->getAll();
 
-
+foreach ($select as $vacancy) {
+    echo '<p>' . $vacancy['title'] . '</p>';
+    echo '<p>' . $vacancy['description'] . '</p>';
+}

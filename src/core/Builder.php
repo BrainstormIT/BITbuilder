@@ -142,8 +142,6 @@ final class Builder {
             $this->bind_values[] = $value;
             $this->bind_keys[] = ':' . $column;
         } else {
-            // The operator becomes the value
-            // and the value becomes the operator
             $this->q->apd(' WHERE ' . $column . $value . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
@@ -257,6 +255,133 @@ final class Builder {
         $this->q->apd(' LIMIT ' . $limit);
         return $this;
     }
+
+    /**
+     * @param $table
+     * @param null $column
+     * @param null $operator
+     * @param null $value
+     * @return $this
+     *
+     * Returns a INNER JOIN statement:
+     *
+     * $select = $qb->table('vacancies v')
+     *      ->select(['v.title', 'v.description'])
+     *      ->join('candidates c', 'v.cid', 'c.id')
+     *      ->getAll();
+     */
+    public function join($table, $column = null, $operator = null, $value = null) {
+        $this->q->apd(' INNER JOIN ' . $table);
+
+        if (!empty($column) || !empty($operator) || !empty($value)) {
+            if (in_array($operator, $this->operators)) {
+                $this->q->apd(' ON ' . $column . $operator . ' ' .  $value);
+            } else {
+                $value = '=';
+                $this->q->apd(' ON ' . $column . ' ' . $value . ' ' . $operator);
+            }
+
+            return $this;
+        } else {
+            return $this;
+        }
+    }
+
+    /**
+     * @param $table
+     * @param null $column
+     * @param null $operator
+     * @param null $value
+     * @return $this
+     *
+     * Returns a LEFT JOIN statement:
+     *
+     * $select = $qb->table('vacancies v')
+     *      ->select(['v.title', 'v.description'])
+     *      ->leftJoin('candidates c', 'v.cid', 'c.id')
+     *      ->getAll();
+     */
+    public function leftJoin($table, $column = null, $operator = null, $value = null) {
+        $this->q->apd(' LEFT JOIN ' . $table);
+
+        if (!empty($column) || !empty($operator) || !empty($value)) {
+            if (in_array($operator, $this->operators)) {
+                $this->q->apd(' ON ' . $column . $operator . ' ' .  $value);
+            } else {
+                $value = '=';
+                $this->q->apd(' ON ' . $column . ' ' . $value . ' ' . $operator);
+            }
+
+            return $this;
+        } else {
+            return $this;
+        }
+    }
+
+
+    /**
+     * @param $table
+     * @param null $column
+     * @param null $operator
+     * @param null $value
+     * @return $this
+     *
+     * Returns a RIGHT JOIN statement:
+     *
+     * $select = $qb->table('vacancies v')
+     *      ->select(['v.title', 'v.description'])
+     *      ->rightJoin('candidates c', 'v.cid', 'c.id')
+     *      ->getAll();
+     */
+    public function rightJoin($table, $column = null, $operator = null, $value = null) {
+        $this->q->apd(' RIGHT JOIN ' . $table);
+
+        if (!empty($column) || !empty($operator) || !empty($value)) {
+            if (in_array($operator, $this->operators)) {
+                $this->q->apd(' ON ' . $column . $operator . ' ' .  $value);
+            } else {
+                $value = '=';
+                $this->q->apd(' ON ' . $column . ' ' . $value . ' ' . $operator);
+            }
+
+            return $this;
+        } else {
+            return $this;
+        }
+    }
+    /**
+     * @param $table
+     * @param null $column
+     * @param null $operator
+     * @param null $value
+     * @return $this
+     *
+     * Returns a FULL OUTER JOIN statement:
+     *
+     * $select = $qb->table('vacancies v')
+     *      ->select(['v.title', 'v.description'])
+     *      ->outerJoin('candidates c', 'v.cid', 'c.id')
+     *      ->getAll();
+     */
+    public function outerJoin($table, $column = null, $operator = null, $value = null) {
+        $this->q->apd(' FULL OUTER JOIN ' . $table);
+
+        if (!empty($column) || !empty($operator) || !empty($value)) {
+            if (in_array($operator, $this->operators)) {
+                $this->q->apd(' ON ' . $column . $operator . ' ' .  $value);
+            } else {
+                $value = '=';
+                $this->q->apd(' ON ' . $column . ' ' . $value . ' ' . $operator);
+            }
+
+            return $this;
+        } else {
+            return $this;
+        }
+    }
+
+
+
 
     /**
      * @param $columns
