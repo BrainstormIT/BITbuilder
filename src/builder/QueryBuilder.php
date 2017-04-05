@@ -373,6 +373,83 @@ class QueryBuilder {
     }
 
     /**
+     * @param $fields
+     * @param null $column
+     * @param null $operator
+     * @param null $value
+     * @return $this|bool
+     *
+     * Updates record:
+     *
+     * $this-qb->table('users')->update(['first_name' => 'John'], 'id', 79);
+     *
+     * You can also manually add a where clause
+     * by calling the 'where' method:
+     *
+     * $this-qb->table('users')->update(['first_name' => 'John', 'last_name' => 'Doe'])
+     *      ->where('id', 79)
+     *      ->exec();
+     */
+    public function update($fields, $column = null, $operator = null, $value = null) {
+        if (is_array($fields) && Arr::is_assoc($fields)) {
+            // Get array keys
+            $arr_keys = array_keys($fields);
+
+            // Get array values
+            $arr_values = array_values($fields);
+
+            // Build up the prepared update array
+            $update = [];
+
+            // Build up UPDATE statement
+            $this->query = ' UPDATE ' . $this->table_name . ' SET ';
+
+            for ($ii = 0; $ii < count($arr_keys); $ii++) {
+                if ($ii != count($arr_keys) -1) {
+                    $this->query .= $arr_keys[$ii] . ' = :' .$arr_keys[$ii]. ', ';
+                    $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                } else {
+                    $this->query .= $arr_keys[$ii] . ' = :' .$arr_keys[$ii];
+                    $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                }
+            }
+
+            if (!empty($column) || !empty($operator) || !empty($value)) {
+                if (in_array($operator, $this->operators)) {
+                    $this->query .= ' WHERE ' . $column . $operator . ' :' . $column;
+                    $update[':' . $column] = $value;
+                } else {
+                    $value = '=';
+                    $this->query .= ' WHERE ' . $column . $value . ' :' . $column;
+                    $update[':' . $column] = $operator;
+                }
+
+                try {
+                    $query = $this->db->prepare($this->query);
+                    $query->execute($update);
+                    $this->clear();
+
+                    return true;
+                } catch (\PDOException $e) {
+                    $this->setError('d', $e->getMessage());
+                    return false;
+                }
+            } else {
+                foreach($update as $key => $value) {
+                    // Add the value/key to the bind_values/bind_keys array
+                    $this->bind_values[] = $value;
+                    $this->bind_keys[] = $key;
+                }
+
+                return $this;
+            }
+        } else {
+            $this->setError('q', 'Wrong array format or no array provided');
+            return false;
+        }
+    }
+
+    /**
      * @return array
      *
      * Returns assoc array of all records found:
@@ -434,6 +511,8 @@ class QueryBuilder {
     }
 
     /**
+     * @return bool
+     *
      * Executes $this->query
      */
     public function exec() {
@@ -451,6 +530,9 @@ class QueryBuilder {
     }
 
     /**
+     * @param $query
+     * @return $this;
+     *
      * Simply build up the query
      * however the user wants it to be
      */
