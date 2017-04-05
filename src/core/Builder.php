@@ -1,10 +1,10 @@
 <?php
 
-namespace QueryBuilder\Builder;
+namespace BITbuilder\core;
 
-use QueryBuilder\Helpers\Arr;
+use BITbuilder\helpers\Arr;
 
-class QueryBuilder {
+final class Builder {
     /**
      * @var Object
      * PDO Database Object

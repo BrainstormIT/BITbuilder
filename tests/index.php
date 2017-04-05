@@ -1,14 +1,14 @@
 <?php
 
-use QueryBuilder\Builder\QueryBuilder;
-use QueryBuilder\Helpers\Database;
+use BITbuilder\core\Builder;
+use BITbuilder\helpers\Database;
 
-require '../src/builder/QueryBuilder.php';
+require '../src/core/Builder.php';
 require '../src/helpers/Arr.php';
 require '../src/helpers/Database.php';
 
 $db = new Database();
-$qb = new QueryBuilder($db);
+$qb = new Builder($db);
 
 echo '<code style="color: darkgreen">' . htmlentities('$qb->table(\'candidates\')->select(\'*\')->getAll();') .'</code>';
 $select = $qb->table('candidates')->select('*')->getAll();

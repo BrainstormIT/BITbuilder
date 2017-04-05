@@ -1,6 +1,6 @@
 <?php
 
-namespace QueryBuilder\Helpers;
+namespace BITbuilder\helpers;
 
 class Arr {
     /**
