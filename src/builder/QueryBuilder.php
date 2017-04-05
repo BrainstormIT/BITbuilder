@@ -57,7 +57,7 @@ class QueryBuilder {
      */
     public $error;
 
-    public function __construct(\PDO $db) {
+    public function __construct($db) {
         if (!$db instanceof \PDO) {
             $this->setError('q', 'Invalid PDO Database object provided');
             die();
@@ -488,7 +488,7 @@ class QueryBuilder {
      * Loop over the bind_values array and bind the
      * actual values to the PDO query
      */
-    public function bindValues(\PDOStatement $query) {
+    public function bindValues($query) {
         if (!empty($this->bind_values) && !empty($this->bind_keys)) {
             if (!$query instanceof \PDOStatement) {
                 $this->setError('q', 'No valid PDO Statement provided');
