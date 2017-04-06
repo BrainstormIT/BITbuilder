@@ -279,6 +279,20 @@ final class Builder {
     }
 
     /**
+     * @param String $by
+     * @return $this
+     *
+     * Groups record by for example a table name:
+     * $qb->table('users')->select('count(*) AS count')
+     *          ->groupBy('first_name')
+     *          ->getAll();
+     */
+    public function groupBy($by) {
+        $this->q->apd(' GROUP BY '  . $by);
+        return $this;
+    }
+
+    /**
      * @param $limit
      * @return $this
      *
