@@ -705,8 +705,6 @@ final class Builder {
                 $this->lastInsertId = $this->db->lastInsertId();
             }
 
-            var_dump($this->lastInsertId);
-
             $this->clear();
 
             return true;
