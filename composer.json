@@ -1,5 +1,12 @@
 {
   "name": "brainstormit/bitbuilder",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/BrainstormIT/BITbuilder"
+    }
+  ],
+
   "description": "Easy to read querybuilder with a short learning curve!",
   "license" : "MIT",
   "homepage": "https://github.com/BrainstormIT/BITbuilder",
@@ -28,7 +35,10 @@
 
   "autoload": {
     "psr-4": {
-      "brainstormit\\bitbuilder\\": "src/"
+      "BITbuilder\\": [
+        "core/",
+        "helpers/"
+      ]
     }
   }
 }
