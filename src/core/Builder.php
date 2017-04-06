@@ -119,6 +119,45 @@ final class Builder {
     }
 
     /**
+     * @param string $columns
+     * @return $this
+     *
+     * Returns a select distinct statement:
+     * $select = $qb->table('users')
+     *       ->selectDistinct('first_name')
+     *       ->getAll();
+     *
+     * You can also pass in an array with the fields you want to select:
+     *
+     * $fields = ['first_name', 'last_name'];
+     * $this->qb->table('users')
+     *        ->selectDistinct($fields)
+     *        ->getAll();
+     */
+    public function selectDistinct($columns = '*') {
+        if (!is_array($columns)) {
+            $this->q->apd('SELECT DISTINCT ' . $columns . ' FROM ' . $this->table_name);
+        } else {
+            $fields = '';
+
+            // Build $fields string by looping over $columns array
+            for ($ii = 0; $ii < count($columns); $ii++) {
+                // As long as the current item in the loop
+                // isn't the last array item add a comma at the end
+                if ($ii != count($columns) -1) {
+                    $fields .= $columns[$ii]. ', ';
+                } else {
+                    $fields .= $columns[$ii];
+                }
+            }
+
+            $this->q->apd('SELECT DISTINCT ' . $fields . ' FROM ' . $this->table_name);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param $column
      * @param $value
      * @param string $operator
@@ -318,7 +357,6 @@ final class Builder {
         }
     }
 
-
     /**
      * @param $table
      * @param null $column
@@ -349,6 +387,7 @@ final class Builder {
             return $this;
         }
     }
+
     /**
      * @param $table
      * @param null $column
@@ -379,9 +418,6 @@ final class Builder {
             return $this;
         }
     }
-
-
-
 
     /**
      * @param $columns
