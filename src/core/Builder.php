@@ -174,17 +174,19 @@ final class Builder {
      */
     public function where($column, $operator, $value = '=') {
         if (in_array($operator, $this->operators)) {
-            $this->q->apd(' WHERE ' . $column . $operator . ' :' . $column);
+            $bind_column = str_replace(".", "", $column);
+            $this->q->apd(' WHERE ' . $column . ' ' . $operator . ' :' . $bind_column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
-            $this->bind_keys[] = ':' . $column;
+            $this->bind_keys[] = ':' . $bind_column;
         } else {
-            $this->q->apd(' WHERE ' . $column . $value . ' :' . $column);
+            $bind_column = str_replace(".", "", $column);
+            $this->q->apd(' WHERE ' . $column . ' ' . $value . ' :' . $bind_column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
-            $this->bind_keys[] = ':' . $column;
+            $this->bind_keys[] = ':' . $bind_column;
         }
 
         return $this;
@@ -206,19 +208,19 @@ final class Builder {
      */
     public function or_ ($column, $operator, $value) {
         if (in_array($operator, $this->operators)) {
+            $bind_column = str_replace(".", "", $column);
             $this->q->apd(' OR ' . $column . $operator . ':' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
-            $this->bind_keys[] = ':' . $column;
+            $this->bind_keys[] = ':' . $bind_column;
         } else {
-            // The operator becomes the value
-            // and the value becomes the operator
+            $bind_column = str_replace(".", "", $column);
             $this->q->apd(' OR ' . $column . $value . ':' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
-            $this->bind_keys[] = ':' . $column;
+            $this->bind_keys[] = ':' . $bind_column;
         }
 
         return $this;
@@ -240,19 +242,19 @@ final class Builder {
      */
     public function and_($column, $operator, $value) {
         if (in_array($operator, $this->operators)) {
+            $bind_column = str_replace(".", "", $column);
             $this->q->apd(' AND ' . $column . $operator . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
-            $this->bind_keys[] = ':' . $column;
+            $this->bind_keys[] = ':' . $bind_column;
         } else {
-            // The operator becomes the value
-            // and the value becomes the operator
+            $bind_column = str_replace(".", "", $column);
             $this->q->apd(' AND ' . $column . $value . ' :' . $column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
-            $this->bind_keys[] = ':' . $column;
+            $this->bind_keys[] = ':' . $bind_column;
         }
 
         return $this;
