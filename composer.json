@@ -1,6 +1,8 @@
 {
   "name": "brainstormit/bitbuilder",
   "description": "Easy to read querybuilder with a short learning curve!",
+  "license" : "MIT",
+  "homepage": "https://github.com/BrainstormIT/BITbuilder",
   "authors": [
     {
       "name": "Dennis Slimmers",
