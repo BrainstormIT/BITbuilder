@@ -45,13 +45,6 @@ final class Builder {
 
     /**
      * @var array
-     * Datatypes that should not get quoted
-     */
-    private  $dont_quote = ['boolean', 'integer', 'double',
-                            'array', 'object', 'resource', 'NULL'];
-
-    /**
-     * @var array
      * This variable will contain the error message if
      * something goes wrong
      */
@@ -631,7 +624,7 @@ final class Builder {
      * Returns assoc array of all records found:
      * $this->qb->table('users')->select('*')->getAll();
      */
-    public function getAll() {
+    public function fetchAll() {
         try {
             $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
@@ -652,7 +645,7 @@ final class Builder {
      * $this->qb->table('users')->select('first_name')
      *      ->where('id', 33)->get();
      */
-    public function get() {
+    public function fetch() {
         try {
             $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
@@ -775,13 +768,6 @@ final class Builder {
     }
 
     /**
-     * Prints $this->q
-     */
-    public function logQuery() {
-        echo $this->q->get();
-    }
-
-    /**
      * @param $type
      * @param $message
      *
@@ -807,27 +793,4 @@ final class Builder {
     public function getError() {
         return $this->error;
     }
-
-
-    /**
-     * @param $var
-     * @param $exception
-     * @return mixed
-     *
-     * Don't quote the variable if it's datatype
-     * is in the $this->dont_quote array
-     *
-     * TODO: Is this still necessary?
-     */
-    public function quote($var, $exception = false) {
-        if (!$exception) {
-            if (in_array(gettype($var), $this->dont_quote)) {
-                return $var;
-            }
-        }
-
-        return $this->db->quote($var);
-    }
 }
-
-

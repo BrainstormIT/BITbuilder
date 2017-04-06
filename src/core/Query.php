@@ -46,4 +46,11 @@ class Query {
     public function emptyQuery() {
         $this->set('');
     }
+
+    /**
+     * Prints the query
+     */
+    public function logQuery() {
+        echo $this->get();
+    }
 }
