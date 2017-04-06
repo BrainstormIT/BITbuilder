@@ -44,6 +44,12 @@ final class Builder {
     private $bind_keys = [];
 
     /**
+     * @var int
+     * Last inserted id
+     */
+    private $lastInsertId;
+
+    /**
      * @var array
      * This variable will contain the error message if
      * something goes wrong
@@ -480,6 +486,9 @@ final class Builder {
                 $query->execute($insert);
                 $this->clear();
 
+                // Set last inserted id
+                $this->lastInsertId = $this->db->lastInsertId();
+
                 return true;
             } catch (\PDOException $e) {
                 $this->setError('d', $e->getMessage());
@@ -689,6 +698,15 @@ final class Builder {
             $query = $this->db->prepare($this->q->get());
             $this->bindValues($query);
             $query->execute();
+
+            // Set the last inserted id but only
+            // of $this->db->lastInsertId() is not empty
+            if (!empty($this->db->lastInsertId())) {
+                $this->lastInsertId = $this->db->lastInsertId();
+            }
+
+            var_dump($this->lastInsertId);
+
             $this->clear();
 
             return true;
@@ -792,5 +810,12 @@ final class Builder {
      */
     public function getError() {
         return $this->error;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastInsertId() {
+        return $this->lastInsertId;
     }
 }
