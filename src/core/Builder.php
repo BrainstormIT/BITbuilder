@@ -813,6 +813,20 @@ final class Builder {
     }
 
     /**
+     * @return string
+     */
+    public function getQuery() {
+        return $this->q->get();
+    }
+
+    /**
+     * Logs query
+     */
+    public function logQuery() {
+        var_dump($this->q->get());
+    }
+
+    /**
      * @return int
      */
     public function getLastInsertId() {
