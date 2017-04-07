@@ -206,17 +206,17 @@ final class Builder {
      *              ->or_('first', '!=', 'John')
      *              ->getAll();
      */
-    public function or_ ($column, $operator, $value) {
+    public function or_ ($column, $operator, $value = '=') {
         if (in_array($operator, $this->operators)) {
             $bind_column = str_replace(".", "", $column);
-            $this->q->apd(' OR ' . $column . $operator . ':' . $column);
+            $this->q->apd(' OR ' . $column . $operator . ':' . $bind_column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
             $this->bind_keys[] = ':' . $bind_column;
         } else {
             $bind_column = str_replace(".", "", $column);
-            $this->q->apd(' OR ' . $column . $value . ':' . $column);
+            $this->q->apd(' OR ' . $column . $value . ':' . $bind_column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
@@ -240,17 +240,17 @@ final class Builder {
      *              ->and_('first', '!=', 'John')
      *              ->getAll();
      */
-    public function and_($column, $operator, $value) {
+    public function and_($column, $operator, $value = '=') {
         if (in_array($operator, $this->operators)) {
             $bind_column = str_replace(".", "", $column);
-            $this->q->apd(' AND ' . $column . $operator . ' :' . $column);
+            $this->q->apd(' AND ' . $column . $operator . ' :' . $bind_column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $value;
             $this->bind_keys[] = ':' . $bind_column;
         } else {
             $bind_column = str_replace(".", "", $column);
-            $this->q->apd(' AND ' . $column . $value . ' :' . $column);
+            $this->q->apd(' AND ' . $column . $value . ' :' . $bind_column);
 
             // Add the value/key to the bind_values/bind_keys array
             $this->bind_values[] = $operator;
