@@ -38,7 +38,8 @@
       "src/core/Builder.php",
       "src/core/Query.php",
       "src/helpers/Arr.php",
-      "src/helpers/Database.php"
+      "src/helpers/Database.php",
+      "src/helpers/Str.php"
     ]
   }
 }
