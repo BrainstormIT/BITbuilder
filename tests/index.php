@@ -6,6 +6,7 @@ use BITbuilder\helpers\Database;
 require '../src/core/Builder.php';
 require '../src/core/Query.php';
 require '../src/helpers/Arr.php';
+require '../src/helpers/Str.php';
 require '../src/helpers/Database.php';
 
 $db = new Database();

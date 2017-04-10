@@ -3,6 +3,7 @@
 namespace BITbuilder\core;
 
 use BITbuilder\helpers\Arr;
+use BITbuilder\helpers\Str;
 
 final class Builder {
     /**
@@ -55,6 +56,18 @@ final class Builder {
      * something goes wrong
      */
     public $error;
+
+    /**
+     * @var array
+     * SQL functions where no PDO param has to
+     * be bound to
+     */
+    public $SQLFunctions = [
+        'AVG', 'COUNT', 'FIRST', 'LAST', 'MAX', 'MIN', 'ROUND', 'SUM',
+        'CONCAT', 'LEFT', 'LEN', 'LENGTH', 'LOWER', 'LCASE', 'LTRIM',
+        'SUBSTRING', 'MID', 'NOW', 'PATINDEX', 'REPLACE', 'RIGHT', 'RTRIM'.
+        'UPPER', 'UCASE'
+    ];
 
     public function __construct($db) {
         if (!$db instanceof \PDO) {
@@ -467,16 +480,22 @@ final class Builder {
             for ($ii = 0; $ii < count($arr_keys); $ii++) {
                 if ($ii != count($arr_keys) -1) {
                     $fields .= $arr_keys[$ii] . ', ';
-                    $values .= ':' . $arr_keys[$ii] . ', ';
 
-                    // Build up the prepared insert array
-                    $insert[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    if (!$this->is_SQL_function($arr_values[$ii])) {
+                        $values .= ':' . $arr_keys[$ii] . ', ';
+                        $insert[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    } else {
+                        $values .= $arr_values[$ii] . ', ';
+                    }
                 } else {
                     $fields .= $arr_keys[$ii] . ') VALUES (';
-                    $values .= ':' . $arr_keys[$ii] . ')';
 
-                    // Build up the prepared insert array
-                    $insert[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    if (!$this->is_SQL_function($arr_values[$ii])) {
+                        $values .= ':' . $arr_keys[$ii] . ')';
+                        $insert[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    } else {
+                        $values .= $arr_values[$ii] . ')';
+                    }
                 }
             }
 
@@ -586,11 +605,19 @@ final class Builder {
 
             for ($ii = 0; $ii < count($arr_keys); $ii++) {
                 if ($ii != count($arr_keys) -1) {
-                    $this->q->apd($arr_keys[$ii] . ' = :' .$arr_keys[$ii]. ', ');
-                    $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    if (!$this->is_SQL_function($arr_values[$ii])) {
+                        $this->q->apd($arr_keys[$ii] . ' = :' . $arr_keys[$ii] . ', ');
+                        $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    } else {
+                        $this->q->apd($arr_keys[$ii] . ' = ' . $arr_values[$ii] . ', ');
+                    }
                 } else {
-                    $this->q->apd($arr_keys[$ii] . ' = :' .$arr_keys[$ii]);
-                    $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    if (!$this->is_SQL_function($arr_values[$ii])) {
+                        $this->q->apd($arr_keys[$ii] . ' = :' .$arr_keys[$ii]);
+                        $update[':' . $arr_keys[$ii]] = $arr_values[$ii];
+                    } else {
+                        $this->q->apd($arr_keys[$ii] . ' = ' .$arr_values[$ii]);
+                    }
                 }
             }
 
@@ -726,6 +753,25 @@ final class Builder {
     public function raw($query) {
         $this->q->apd($query);
         return $this;
+    }
+
+    /**
+     * @param $var
+     * @return bool
+     *
+     * Returns true if given variable is
+     * built in SQL function
+     */
+    public function is_SQL_function($var) {
+        $isSQLFunction = false;
+
+        foreach ($this->SQLFunctions as $function) {
+            if (Str::contains(strtoupper($var), [$function, '(', ')'], true)) {
+                $isSQLFunction = true;
+            }
+        }
+
+        return $isSQLFunction;
     }
 
 
