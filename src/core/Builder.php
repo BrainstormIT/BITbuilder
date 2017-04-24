@@ -855,7 +855,11 @@ final class Builder {
      * @return mixed
      */
     public function getError() {
-        return $this->error;
+        if (isset($this->error)) {
+            return $this->error;
+        }
+
+        return array();
     }
 
     /**
