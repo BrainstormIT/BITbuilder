@@ -276,7 +276,7 @@ final class Builder {
     /**
      * @param $sort
      * @param string $order
-     * @return $this
+     * @return mixed
      *
      * Orders found record (ASC or DESC):
      * $qb->table('users')->select('*')->orderBy('id')->getAll();
@@ -308,7 +308,7 @@ final class Builder {
 
     /**
      * @param $limit
-     * @return $this
+     * @return mixed
      *
      * Limits amount of rows:
      * $qb->table('users')->select('*')->limit(20)->getAll();
@@ -525,7 +525,7 @@ final class Builder {
      * @param null $column
      * @param null $operator
      * @param null $value
-     * @return $this|bool
+     * @return mixed
      *
      * Deletes row from record:
      *
@@ -576,7 +576,7 @@ final class Builder {
      * @param null $column
      * @param null $operator
      * @param null $value
-     * @return $this|bool
+     * @return mixed
      *
      * Updates record:
      *
@@ -657,7 +657,7 @@ final class Builder {
     }
 
     /**
-     * @return array
+     * @return mixed
      *
      * Returns assoc array of all records found:
      * $this->qb->table('users')->select('*')->getAll();
@@ -677,7 +677,7 @@ final class Builder {
     }
 
     /**
-     * @return array
+     * @return mixed
      *
      * Returns assoc array of the first record found:
      * $this->qb->table('users')->select('first_name')
