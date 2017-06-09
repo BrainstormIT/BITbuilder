@@ -28,7 +28,8 @@ final class Builder {
      * @var array
      * Operators
      */
-    private $operators = ['=', '!=', '<', '>', '>=', '<='];
+    private $operators = ['=', '!=', '<', '>', '>=', '<=',
+                          'IN', 'IS', 'IS NOT', 'LIKE', 'BETWEEN'];
 
     /**
      * @var array
